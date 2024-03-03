@@ -2,9 +2,12 @@ package com.example.cojcodesandbox.utils;
 
 import cn.hutool.core.util.StrUtil;
 import com.example.cojcodesandbox.model.ExecuteMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StopWatch;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 进程工具类
@@ -32,25 +35,23 @@ public class ProcessUtils {
                 System.out.println(opName + "失败，错误码：" + exitValue);
                 // 分批获取进程的错误输出流
                 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
-                StringBuilder errorCompileOutputStringBuilder = new StringBuilder();
+                List<String> errorOutputStrList = new ArrayList<>();
                 // 逐行读取
                 String complieErrorLine;
                 while ((complieErrorLine = errorBufferedReader.readLine()) != null) {
-                    errorCompileOutputStringBuilder.append(complieErrorLine).append("\n");
+                    errorOutputStrList.add(complieErrorLine);
                 }
-//                System.out.println(errorCompileOutputStringBuilder.toString());
-                executeMessage.setErrorMessge(errorCompileOutputStringBuilder.toString());
+                executeMessage.setErrorMessge(StringUtils.join(errorOutputStrList, "\n"));
             }
             // 分批获取进程的正常输出流
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
-            StringBuilder compileOutputStringBuilder = new StringBuilder();
+            List<String> outputStrList = new ArrayList<>();
             // 逐行读取
             String complieOutputLine;
             while ((complieOutputLine = bufferedReader.readLine()) != null) {
-                compileOutputStringBuilder.append(complieOutputLine).append("\n");
+                outputStrList.add(complieOutputLine);
             }
-//            System.out.println(compileOutputStringBuilder.toString());
-            executeMessage.setMessage(compileOutputStringBuilder.toString());
+            executeMessage.setMessage(StringUtils.join(outputStrList, "\n"));
 
             stopWatch.stop();
             executeMessage.setTime(stopWatch.getTotalTimeMillis());
